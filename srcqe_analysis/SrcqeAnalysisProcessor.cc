@@ -7,6 +7,7 @@
 #include <dis/functions.h>
 #include <MinimalistModel/McFluxHit.h>
 #include <MinimalistModel/McTrack.h>
+#include <MinimalistModel/McGeneratedParticle.h>
 
 #include <ejana/EServicePool.h>
 #include <ejana/EStringHelpers.h>
@@ -60,6 +61,10 @@ void SrcqeAnalysisProcessor::Process(const std::shared_ptr<const JEvent> &event)
     using namespace minimodel;
     std::lock_guard<std::recursive_mutex> locker(root_out.lock);
 
+    if (verbose >= 3) {
+        print("=========== EVENT # {} ================\n", event->GetEventNumber());
+    }
+
     auto hits = event->Get<minimodel::McFluxHit>();
     std::unordered_set<uint64_t> track_ids_in_d2;
 
@@ -96,6 +101,14 @@ void SrcqeAnalysisProcessor::Process(const std::shared_ptr<const JEvent> &event)
                 print("srcqe_analysis: track {:<5} px: {:<11} py: {:<11} pz: {:<11} pt: {:<11}  ptot: {:<11}\n",
                       track->pdg, track->px, track->py, track->pz, p_lv.Pt(), p_lv.P());
             }
+        }
+    }
+
+    auto particles = event->Get<minimodel::McGeneratedParticle>();
+    for(auto particle: particles) {
+        if (verbose >= 3) {
+            print("srcqe_analysis: pdg {:<5}  track_id: {:<11}\n",
+                  particle->pdg, particle->trk_id);
         }
     }
 }
